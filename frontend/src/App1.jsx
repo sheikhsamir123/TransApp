@@ -292,8 +292,14 @@ function BookRidePage({ username, onBack, onTripBooked, serviceType = "Ride" }) 
       } else {
         setMessage(`✗ ${data.message}`)
       }
-    } catch {
-      setMessage("Server error — is FastAPI running?")
+    } catch (error) {
+      console.log(error)
+      console.log(error.response)
+      setMessage(
+        error.response?.data?.message ||
+        error.message ||
+        "Server error"
+      )
     }
     setLoading(false)
   }
