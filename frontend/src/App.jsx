@@ -19,7 +19,7 @@ L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, 
 const LIBRARIES = ["places"]
 const MAP_CENTER = { lat: 27.7172, lng: 85.3240 } // Kathmandu
 // Add this once at the top of your App.jsx, outside all components
-axios.defaults.timeout = 8000  // 8 seconds, then auto-throw error\\
+axios.defaults.timeout = 60000  // 8 seconds, then auto-throw error\\
 
 
 
