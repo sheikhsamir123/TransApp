@@ -4,3 +4,6 @@ python-jose
 passlib
 bcrypt
 python-multipart
+sqlalchemy
+python-dotenv
+aiofiles
