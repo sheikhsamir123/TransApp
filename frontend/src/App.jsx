@@ -10,6 +10,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
 import markerIcon   from "leaflet/dist/images/marker-icon.png"
 import markerShadow from "leaflet/dist/images/marker-shadow.png"
 const API = "https://transapp-1.onrender.com"
+
 import { HistoryPage, styles, s, sv,ActiveTripPage,TripPage,BookRidePage,AutoPan,RecenterMap,TrackingPage } from "./App1"
 
 delete L.Icon.Default.prototype._getIconUrl
