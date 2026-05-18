@@ -1,7 +1,4 @@
 
-// // export default App
-// // // export default = makes App the main component other files can import
-
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap,useMapEvents } from "react-leaflet"
@@ -1025,14 +1022,6 @@ console.log("Driver coords state:", driverCoords)
   )
 }
 
-// Auto-pan map when driver moves
-// function AutoPan({ coords }) {
-//   const map = useMap()
-//   useEffect(() => {
-//     if (coords) map.panTo([coords.lat, coords.lng], { animate: true, duration: 1 })
-//   }, [coords])
-//   return null
-// }
 // ─────────────────────────────────────────────
 // HistoryPage
 // ─────────────────────────────────────────────

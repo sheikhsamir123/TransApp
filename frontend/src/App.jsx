@@ -1341,11 +1341,6 @@ function DriverSignupPage({ onSwitch, onBack }) {
   )
 }
 
-// ─────────────────────────────────────────────
-// STEP 2 — Full BookRidePage with Leaflet
-// ─────────────────────────────────────────────
-
-// Custom colored marker icons
 export default App
 
 
