@@ -9,6 +9,7 @@ import "leaflet/dist/leaflet.css"
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
 import markerIcon   from "leaflet/dist/images/marker-icon.png"
 import markerShadow from "leaflet/dist/images/marker-shadow.png"
+const API = "https://transapp-1.onrender.com"
 import { HistoryPage, styles, s, sv,ActiveTripPage,TripPage,BookRidePage,AutoPan,RecenterMap,TrackingPage } from "./App1"
 
 delete L.Icon.Default.prototype._getIconUrl
@@ -120,9 +121,9 @@ function FirstPage({ username, userType, onLogin, onLogout, onBookRide, onHistor
   const [topDrivers, setTopDrivers] = useState([])
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/top-drivers")
+    axios.get(`${API}/top-drivers`)
       .then(r => setTopDrivers(r.data.drivers || []))
-      .catch(() => {})
+      .catch(() => {}) 
   }, [])
 
   return (
@@ -401,7 +402,7 @@ function NotificationsPage({ username, onBack }) {
 
   async function fetchNearby() {
     try {
-      const { data } = await axios.get("http://127.0.0.1:8000/driver/nearby-requests", {
+      const { data } = await axios.get(`${API}/driver/nearby-requests`, {
         params: { lat: location.lat, lng: location.lng, radius_km: radiusKm, driver_username: username }
       })
       setRequests(data.requests || [])
@@ -413,7 +414,7 @@ function NotificationsPage({ username, onBack }) {
   async function acceptRequest(requestId) {
     setAccepting(requestId)
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/driver/accept-request", {
+      const { data } = await axios.post(`${API}/driver/accept-request`, {
         driver_username: username, request_id: requestId,
       })
       if (data.success) {
@@ -509,7 +510,7 @@ function NotificationsPage({ username, onBack }) {
 }
 
 const ADMIN_PASSWORD = "transapp_admin_2025"
-const BASE_URL = "http://127.0.0.1:8000"
+const BASE_URL = `${API}`
 
 function AdminPage({ onBack }) {
   const [authed,         setAuthed]         = useState(false)
@@ -769,7 +770,7 @@ function ProfilePage({ username, userType, onBack }) {
   // Fetch verification status on mount (driver only)
   useEffect(() => {
     if (userType !== "driver") return
-    axios.get(`http://127.0.0.1:8000/driver/profile/${username}`)
+    axios.get(`${API}/driver/profile/${username}`)
       .then(r => {
         if (r.data.success) {
           setVerificationInfo({
@@ -785,7 +786,7 @@ function ProfilePage({ username, userType, onBack }) {
   // Load saved contacts on mount (passenger only)
   useEffect(() => {
     if (userType !== "passenger") return
-    axios.get(`http://127.0.0.1:8000/passenger/family-contacts?username=${username}`)
+    axios.get(`${API}/passenger/family-contacts?username=${username}`)
       .then(r => setContacts(r.data.contacts || []))
       .catch(() => {})
   }, [username, userType])
@@ -795,7 +796,7 @@ function ProfilePage({ username, userType, onBack }) {
       setContactMsg("Name, phone and email are required."); return
     }
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/passenger/family-contacts", {
+      const { data } = await axios.post(`${API}/passenger/family-contacts`, {
         username, name, phone, email, relation,
       })
       if (data.success) {
@@ -808,7 +809,7 @@ function ProfilePage({ username, userType, onBack }) {
 
   async function removeContact(index) {
     try {
-      await axios.delete("http://127.0.0.1:8000/passenger/family-contacts", {
+      await axios.delete(`${API}/passenger/family-contacts`, {
         data: { username, index }
       })
       setContacts(prev => prev.filter((_, i) => i !== index))
@@ -829,7 +830,7 @@ function ProfilePage({ username, userType, onBack }) {
     form.append("bike_front",  bikeFrontFile)
     form.append("bike_back",   bikeBackFile)
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/driver/upload-docs", form, {
+      const { data } = await axios.post(`${API}/driver/upload-docs`, form, {
         headers: { "Content-Type": "multipart/form-data" }
       })
       if (data.success) {
@@ -1154,7 +1155,7 @@ function LoginPage({ onSwitch, onLoginSuccess, onBack }) {
     if (!username || !password) { setMessage("Please fill all fields"); return }
     setLoading(true); setMessage("")
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/login", { username, password })
+      const { data } = await axios.post(`${API}/login`, { username, password })
       if (data.success) { onLoginSuccess(username) }
       else { setMessage(`✗ ${data.message}`) }
     } catch { setMessage("Server error — is FastAPI running?") }
@@ -1194,7 +1195,7 @@ function LoginPage({ onSwitch, onLoginSuccess, onBack }) {
     }
     setLoading(true); setMessage("")
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/signup", {
+      const { data } = await axios.post(`${API}/signup`, {
         username, password, confirm_password, phone,
       })
       if (data.success) { setMessage(`✓ ${data.message}`); setTimeout(() => onSwitch(), 2000) }
@@ -1248,7 +1249,7 @@ function DriverLoginPage({ onSwitch, onLoginSuccess, onBack }) {
     if (!username || !password) { setMessage("Please fill all fields"); return }
     setLoading(true); setMessage("")
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/driver/login", { username, password })
+      const { data } = await axios.post(`${API}/driver/login`, { username, password })
       if (data.success) { onLoginSuccess(username) }
       else { setMessage(`✗ ${data.message}`) }
     } catch { setMessage("Server error — is FastAPI running?") }
@@ -1289,7 +1290,7 @@ function DriverSignupPage({ onSwitch, onBack }) {
     }
     setLoading(true); setMessage("")
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/driver/signup", {
+      const { data } = await axios.post(`${API}/driver/signup`, {
         username, password, confirm_password,
         phone, vehicle_type, experience_years: parseFloat(experience_years),
       })

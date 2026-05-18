@@ -271,7 +271,7 @@ function BookRidePage({ username, onBack, onTripBooked, serviceType = "Ride" }) 
     if (!pickup || !destination) { setMessage("Please select pickup and destination on the map"); return }
     setLoading(true); setMessage("")
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/book-ride", {
+      const { data } = await axios.post(`${API}/book-ride`, {
         username,
         pickup,
         destination,
@@ -455,7 +455,7 @@ function TrackingPage({ tripId }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data } = await axios.get(`http://127.0.0.1:8000/track/${tripId}`)
+        const { data } = await axios.get(`${API}/track/${tripId}`)
         if (data.success) {
           setTripInfo(data)
           if (data.driver_lat && data.driver_lng) {
@@ -609,7 +609,7 @@ function TripPage({ trip, onDone }) {
     if (!trip?.trip_id || status === "accepted") return
     const poll = setInterval(async () => {
       try {
-        const { data } = await axios.get(`http://127.0.0.1:8000/trip-status/${trip.trip_id}`)
+        const { data } = await axios.get(`${API}/trip-status/${trip.trip_id}`)
         if (data.status === "accepted") {
           setDriverInfo(data)
           setStatus("accepted")
@@ -627,7 +627,7 @@ function TripPage({ trip, onDone }) {
     if (status !== "accepted" || !trip?.trip_id) return
     const poll = setInterval(async () => {
       try {
-        const { data } = await axios.get(`http://127.0.0.1:8000/trip/driver-location/${trip.trip_id}`)
+        const { data } = await axios.get(`${API}/trip/driver-location/${trip.trip_id}`)
         if (data.success) setDriverCoords({ lat: data.lat, lng: data.lng })
       } catch (err) {
         handleError(err, "Failed to fetch trip status")
@@ -639,7 +639,7 @@ function TripPage({ trip, onDone }) {
   async function submitRating() {
     if (rating === 0) { setRatingMessage("Please select a star rating"); return }
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/rate-driver", {
+      const { data } = await axios.post(`${API}/rate-driver`, {
         driver_username: driverInfo.driver, rating,
       })
       if (data.success) {
@@ -851,7 +851,7 @@ console.log("Driver coords state:", driverCoords)
 
         // Send live location to backend so passenger can see it
         try {
-          await axios.post("http://127.0.0.1:8000/driver/update-location", {
+          await axios.post(`${API}/driver/update-location`, {
             trip_id:         tripId,
             driver_username: driverUsername,
             lat:             coords.lat,
@@ -1022,6 +1022,7 @@ console.log("Driver coords state:", driverCoords)
   )
 }
 
+
 // ─────────────────────────────────────────────
 // HistoryPage
 // ─────────────────────────────────────────────
@@ -1032,7 +1033,7 @@ function HistoryPage({ username, onBack,userType }) {
 
   useEffect(() => {
       console.log("Fetching history for:", username)  // ← add this
-    axios.get(`http://127.0.0.1:8000/history/${username}/${userType}`)   // ← include userType
+    axios.get(`${API}/history/${username}/${userType}`)   // ← include userType
       .then(r => { setTrips(r.data.trips || []); setLoading(false) })
       .catch(() => { setError("Could not load history"); setLoading(false) })
   }, [username])
