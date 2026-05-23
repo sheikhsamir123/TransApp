@@ -16,7 +16,7 @@ from fastapi import UploadFile, File, Form
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
+from fastapi.background import BackgroundTasks
 from dotenv import load_dotenv
 import os
 
@@ -340,8 +340,9 @@ def send_tracking_email(to_email, passenger_name, trip_id, pickup, destination):
     except Exception as e:
         print(f"❌ Email failed: {e}")
 
+
 @app.post("/book-ride")
-async def book_ride(data: BookRideData, db: Session = Depends(get_db)):
+async def book_ride(data: BookRideData, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     if not data.pickup or not data.destination:
         return {"success": False, "message": "Please enter pickup and destination"}
     if data.pickup == data.destination:
@@ -354,34 +355,33 @@ async def book_ride(data: BookRideData, db: Session = Depends(get_db)):
     }
     fare = fares.get(data.vehicle_type, 100)
 
-    # Save trip WITHOUT a driver — waiting for acceptance
-    
     trip = TripHistory(
-        username     = data.username,
-        pickup       = data.pickup,
-        destination  = data.destination,
-        vehicle_type = data.vehicle_type,
-        service_type = data.service_type,
-        driver_name  = None,        # ← no driver yet
-        fare         = fare,
-        eta          = None,        # ← no eta yet
-        pickup_lat   = data.pickup_lat,
-        pickup_lng   = data.pickup_lng,
-        status       = "pending",   # ← waiting for driver
-        repair_issues = json.dumps(data.repair_issues),  # ← ADD
+        username      = data.username,
+        pickup        = data.pickup,
+        destination   = data.destination,
+        vehicle_type  = data.vehicle_type,
+        service_type  = data.service_type,
+        driver_name   = None,
+        fare          = fare,
+        eta           = None,
+        pickup_lat    = data.pickup_lat,
+        pickup_lng    = data.pickup_lng,
+        status        = "pending",
+        repair_issues = json.dumps(data.repair_issues),
         repair_note   = data.repair_note,
     )
     db.add(trip)
     db.commit()
     db.refresh(trip)
 
-    # ── NEW: send tracking email to all family contacts ──
+    # ── Send emails in background — doesn't block response ──
     passenger = db.query(Passenger).filter(Passenger.username == data.username).first()
     if passenger and passenger.family_contacts:
         contacts = json.loads(passenger.family_contacts or "[]")
         for contact in contacts:
-            if contact.get("email"):   # only if they have email
-                send_tracking_email(
+            if contact.get("email"):
+                background_tasks.add_task(        # ← runs after response is sent
+                    send_tracking_email,
                     to_email       = contact["email"],
                     passenger_name = data.username,
                     trip_id        = trip.id,
@@ -389,7 +389,6 @@ async def book_ride(data: BookRideData, db: Session = Depends(get_db)):
                     destination    = data.destination,
                 )
 
-    # main.py — /book-ride endpoint, update the return:
     return {
         "success":     True,
         "message":     "Looking for a driver...",
@@ -398,8 +397,8 @@ async def book_ride(data: BookRideData, db: Session = Depends(get_db)):
         "pickup":      data.pickup,
         "destination": data.destination,
         "vehicle":     data.vehicle_type,
-        "pickup_lat":  data.pickup_lat,   # ← ADD
-        "pickup_lng":  data.pickup_lng,   # ← ADD
+        "pickup_lat":  data.pickup_lat,
+        "pickup_lng":  data.pickup_lng,
     }
 
 @app.get("/track/{trip_id}")
