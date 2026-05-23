@@ -292,14 +292,13 @@ function BookRidePage({ username, onBack, onTripBooked, serviceType = "Ride" }) 
       } else {
         setMessage(`✗ ${data.message}`)
       }
-    } catch (error) {
-      console.log(error)
-      console.log(error.response)
-      setMessage(
-        error.response?.data?.message ||
-        error.message ||
-        "Server error"
-      )
+    } catch (err) {
+    // ← CHANGE THIS to see the real error
+      console.log("Full error:", err)
+      console.log("Response:", err.response?.data)
+      console.log("Status:", err.response?.status)
+      console.log("Message:", err.message)
+      setMessage(`Error: ${err.message} — ${JSON.stringify(err.response?.data)}`)
     }
     setLoading(false)
   }
