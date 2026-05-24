@@ -1,6 +1,6 @@
 # 🚀 TransApp — Ride Hailing Platform for Nepal
 
-A full-stack ride-hailing web application built for Kathmandu,
+A full-stack ride-hailing web application
 similar to Pathao and inDrive.
 
 ## 🌐 Live Demo
